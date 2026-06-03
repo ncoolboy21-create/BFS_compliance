@@ -1,0 +1,131 @@
+{
+  "aggregate": {
+    "faithfulness": 0.602,
+    "context_recall": 0.75,
+    "pass_faithfulness": false,
+    "pass_context_recall": false,
+    "scoring_mode": "proxy"
+  },
+  "rows": [
+    {
+      "question": "What is required before customer onboarding account activation?",
+      "faithfulness": 0.8,
+      "context_recall": 1.0,
+      "confidence": 0.563,
+      "citations": [
+        "POL-001#S1",
+        "SYN-030#S1",
+        "SYN-048#S1",
+        "SYN-100#S1"
+      ]
+    },
+    {
+      "question": "How quickly must transaction alerts be reviewed?",
+      "faithfulness": 0.867,
+      "context_recall": 1.0,
+      "confidence": 0.551,
+      "citations": [
+        "POL-002#S1",
+        "POL-003#S1",
+        "POL-004#S2",
+        "POL-005#S2"
+      ]
+    },
+    {
+      "question": "How long are compliance records retained?",
+      "faithfulness": 0.829,
+      "context_recall": 1.0,
+      "confidence": 0.552,
+      "citations": [
+        "POL-003#S1",
+        "POL-003#S2",
+        "POL-004#S1",
+        "POL-005#S1"
+      ]
+    },
+    {
+      "question": "Can AI compliance recommendations be auto-approved without human review?",
+      "faithfulness": 0.85,
+      "context_recall": 1.0,
+      "confidence": 0.539,
+      "citations": [
+        "POL-003#S1",
+        "POL-004#S1",
+        "REG-005#S2",
+        "REG-006#S1"
+      ]
+    },
+    {
+      "question": "What did the AML audit find about SLA breaches?",
+      "faithfulness": 0.0,
+      "context_recall": 0.0,
+      "confidence": 0.52,
+      "citations": [
+        "POL-003#S2",
+        "SYN-030#S2",
+        "SYN-048#S2",
+        "SYN-100#S2"
+      ]
+    },
+    {
+      "question": "What is the policy control for high-risk jurisdictions?",
+      "faithfulness": 0.867,
+      "context_recall": 1.0,
+      "confidence": 0.547,
+      "citations": [
+        "POL-001#S2",
+        "SYN-030#S2",
+        "SYN-048#S2",
+        "SYN-100#S2"
+      ]
+    },
+    {
+      "question": "What is expected for cross-border EU data transfer?",
+      "faithfulness": 0.631,
+      "context_recall": 1.0,
+      "confidence": 0.551,
+      "citations": [
+        "POL-007#S1",
+        "POL-007#S2",
+        "REG-003#S1",
+        "REG-004#S2"
+      ]
+    },
+    {
+      "question": "What does regulation say about suspicious activity escalation capability?",
+      "faithfulness": 0.925,
+      "context_recall": 1.0,
+      "confidence": 0.528,
+      "citations": [
+        "AUD-003#S1",
+        "REG-001#S2",
+        "SYN-120#S1",
+        "SYN-120#S2"
+      ]
+    },
+    {
+      "question": "What is expected if privileged account recertification evidence is missing?",
+      "faithfulness": 0.255,
+      "context_recall": 0.5,
+      "confidence": 0.539,
+      "citations": [
+        "AUD-005#S1",
+        "AUD-006#S2",
+        "REG-004#S2",
+        "REG-006#S2"
+      ]
+    },
+    {
+      "question": "What board reporting expectation appears in UK consumer duty update?",
+      "faithfulness": 0.0,
+      "context_recall": 0.0,
+      "confidence": 0.524,
+      "citations": [
+        "AUD-003#S2",
+        "AUD-004#S1",
+        "AUD-006#S2",
+        "POL-008#S2"
+      ]
+    }
+  ]
+}

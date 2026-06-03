@@ -1,0 +1,52 @@
+[
+  {
+    "question": "What is required before customer onboarding account activation?",
+    "ground_truth": "Identity verification and sanctions screening are required before activation.",
+    "expected_citations": ["POL-001#S1"]
+  },
+  {
+    "question": "How quickly must transaction alerts be reviewed?",
+    "ground_truth": "Alerts should be reviewed within one business day by level-1 analysts.",
+    "expected_citations": ["POL-002#S1"]
+  },
+  {
+    "question": "How long are compliance records retained?",
+    "ground_truth": "Compliance records are retained for seven years.",
+    "expected_citations": ["POL-003#S1"]
+  },
+  {
+    "question": "Can AI compliance recommendations be auto-approved without human review?",
+    "ground_truth": "No. AI outputs are recommendations and require human approval.",
+    "expected_citations": ["POL-004#S1", "REG-006#S1"]
+  },
+  {
+    "question": "What did the AML audit find about SLA breaches?",
+    "ground_truth": "6 of 100 alerts exceeded SLA by more than 48 hours.",
+    "expected_citations": ["AUD-001#S1"]
+  },
+  {
+    "question": "What is the policy control for high-risk jurisdictions?",
+    "ground_truth": "Enhanced due diligence is mandatory for PEP and high-risk jurisdictions.",
+    "expected_citations": ["POL-001#S2"]
+  },
+  {
+    "question": "What is expected for cross-border EU data transfer?",
+    "ground_truth": "Cross-border transfer needs legal mechanism, risk assessment, and DPO review under policy controls.",
+    "expected_citations": ["REG-003#S1", "POL-007#S2"]
+  },
+  {
+    "question": "What does regulation say about suspicious activity escalation capability?",
+    "ground_truth": "Monitoring systems should support timely suspicious activity escalation.",
+    "expected_citations": ["REG-001#S2"]
+  },
+  {
+    "question": "What is expected if privileged account recertification evidence is missing?",
+    "ground_truth": "Audit found missing recertification evidence; exception was temporary for seven days.",
+    "expected_citations": ["AUD-005#S1", "AUD-005#S2"]
+  },
+  {
+    "question": "What board reporting expectation appears in UK consumer duty update?",
+    "ground_truth": "Boards should receive regular outcome metrics and challenge records.",
+    "expected_citations": ["REG-002#S2"]
+  }
+]

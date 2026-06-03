@@ -1,0 +1,100 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage
+.pytest_cache/
+.tox/
+.nox/
+.coverage
+coverage.xml
+htmlcov/
+
+# Virtual environments
+venv/
+env/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# VS Code settings
+.vscode/
+
+# JetBrains IDEs
+.idea/
+
+# Editor temporary files
+*.swp
+*~
+*.swo
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Environment / secrets
+.env
+.env.*
+secrets.json
+credentials.json
+local_settings.py
+
+# Logs
+logs/
+*.log
+
+# Jupyter
+.ipynb_checkpoints
+
+# Mypy
+.mypy_cache/
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Model checkpoints and large artifacts
+*.ckpt
+*.pth
+*.pt
+*.bin
+*.index
+*.ann
+vectors/
+embeddings/
+checkpoints/
+
+# Databases / caches
+*.sqlite3
+*.sqlite
+*.db
+*.db-journal
+
+# Coverage / profiling
+.coverage
+.cache
+*.prof
+
+# Misc
+*.egg
+*.eggs
+Pipfile.lock
+*.pytest_cache/
