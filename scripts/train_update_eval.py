@@ -10,7 +10,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Run LoRA train -> update .env -> run eval in one command"
     )
-    parser.add_argument("--base-model", default="cross-encoder/ms-marco-MiniLM-L-6-v2")
+    parser.add_argument("--base-model", default="cross-encoder/ms-marco-MiniLM-L-12-v2")
     parser.add_argument("--golden-path", default="data/golden_set.json")
     parser.add_argument("--corpus-path", default="data/synthetic_corpus.jsonl")
     parser.add_argument("--output-dir", default="models/reranker_lora")

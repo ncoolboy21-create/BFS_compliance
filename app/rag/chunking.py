@@ -14,10 +14,27 @@ def _split_with_overlap(text: str, chunk_size: int, overlap: int) -> list[str]:
     start = 0
     while start < len(cleaned):
         end = min(start + chunk_size, len(cleaned))
-        segments.append(cleaned[start:end])
+
+        # Prefer splitting on whitespace so chunks do not start/end mid-word.
+        if end < len(cleaned) and cleaned[end].isalnum():
+            backtrack = cleaned.rfind(" ", start, end)
+            if backtrack > start + int(chunk_size * 0.6):
+                end = backtrack
+
+        segment = cleaned[start:end].strip()
+        if segment:
+            segments.append(segment)
+
         if end == len(cleaned):
             break
+
         start = max(0, end - overlap)
+        # If overlap start lands inside a word, advance to next boundary.
+        if 0 < start < len(cleaned) and cleaned[start - 1].isalnum() and cleaned[start].isalnum():
+            while start < len(cleaned) and cleaned[start].isalnum():
+                start += 1
+            while start < len(cleaned) and cleaned[start] == " ":
+                start += 1
     return segments
 
 

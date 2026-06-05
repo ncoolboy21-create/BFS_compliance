@@ -136,12 +136,10 @@
     }
 
     /* ── Citations ── */
-    .citations-toggle {
-      margin-top: 10px; font-size: 11px; color: var(--text-dim); cursor: pointer;
-      display: inline-flex; align-items: center; gap: 4px; user-select: none;
-      transition: color .15s;
+    .citations-label {
+      margin-top: 10px; font-size: 11px; color: var(--text-dim);
+      display: inline-flex; align-items: center; gap: 6px;
     }
-    .citations-toggle:hover { color: var(--accent-h); }
     .citations-list { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
     .citation-card {
       border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
@@ -560,7 +558,7 @@ function appendAnswerBubble(data) {
 
   const conf = data.confidence;
   const confClass = conf >= 0.75 ? 'high' : conf >= 0.55 ? 'medium' : 'low';
-  const confLabel = conf >= 0.75 ? '● High' : conf >= 0.55 ? '● Medium' : '● Low';
+  const confLabel = conf >= 0.75 ? 'High confidence' : conf >= 0.55 ? 'Medium confidence' : 'Low confidence';
   const confPct = (conf * 100).toFixed(0);
 
   const escBadges = (data.escalation_reasons || []).map(r =>
@@ -569,20 +567,20 @@ function appendAnswerBubble(data) {
   const citationsHtml = buildCitationsHtml(data.citations || []);
   const citCount = (data.citations || []).length;
 
-  const needsApproval = data.trust_decision === 'AI_RECOMMEND_HUMAN_APPROVE';
+  const needsApproval = data.trust_decision === 'AI_RECOMMEND_HUMAN_APPROVE' || data.trust_decision === 'HUMAN_APPROVAL_REQUIRED';
 
   // Full answer HTML (used after approval or when no gate needed)
   const answerBodyHtml = `
     <div class="answer-text">${esc(data.answer)}</div>
     <div class="meta-row">
-      <span class="conf-badge ${confClass}">${confLabel} confidence (${confPct}%)</span>
+      <span class="conf-badge ${confClass}">${confLabel} (${confPct}%)</span>
       ${escBadges}
     </div>
     ${citCount > 0 ? `
-      <div class="citations-toggle" onclick="toggleCitations(this)">
-        📎 ${citCount} citation${citCount > 1 ? 's' : ''} <span>▸</span>
+      <div class="citations-label">
+        📎 ${citCount} citation${citCount > 1 ? 's' : ''} shown below
       </div>
-      <div class="citations-list" style="display:none">${citationsHtml}</div>
+      <div class="citations-list">${citationsHtml}</div>
     ` : '<div style="margin-top:8px;font-size:11px;color:var(--red)">⚠ No citations found — verify manually.</div>'}
   `;
 
@@ -622,7 +620,7 @@ function appendAnswerBubble(data) {
       <div class="bubble">
         ${answerBodyHtml}
         <div class="meta-row" style="margin-top:8px">
-          <span class="trust-badge">🔒 ${esc(data.trust_decision)}</span>
+          <span class="trust-badge">🔒 ${data.trust_decision === 'AI_AUTO_APPROVED' ? 'Auto-approved' : 'Needs human approval'}</span>
         </div>
       </div>
     `;
@@ -668,10 +666,10 @@ function buildCitationsHtml(citations) {
   return citations.map(c => `
     <div class="citation-card">
       <div class="citation-header">
-        <span class="doc-ref">${esc(c.doc_id)}</span>
-        <span class="sec-ref">§ ${esc(c.section_id)}</span>
+        <span class="doc-ref">Source: ${esc(c.doc_id)}</span>
+        <span class="sec-ref">Section ${esc(c.section_id)}</span>
       </div>
-      <div class="citation-quote">"${esc(c.quote)}"</div>
+      ${c.quote ? `<div class="citation-quote">"${esc(c.quote)}"</div>` : ''}
     </div>
   `).join('');
 }

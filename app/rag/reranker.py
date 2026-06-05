@@ -48,8 +48,27 @@ class Reranker:
         return scored[:top_k]
 
     @staticmethod
-    def confidence_from_scores(scores: list[float]) -> float:
+    def confidence_from_scores(scores: list[float], citation_count: int = 0) -> float:
         if not scores:
             return 0.0
-        mean_score = sum(scores) / len(scores)
-        return 1 / (1 + math.exp(-mean_score))
+
+        min_score = min(scores)
+        max_score = max(scores)
+        
+        if max_score <= min_score:
+            normalized_scores = [0.5] * len(scores)
+        else:
+            normalized_scores = [(s - min_score) / (max_score - min_score) for s in scores]
+        
+        mean_score = sum(normalized_scores) / len(normalized_scores)
+        top_score = max(normalized_scores)
+
+        consistency = 1.0
+        if len(normalized_scores) > 1:
+            variance = sum((score - mean_score) ** 2 for score in normalized_scores) / (len(normalized_scores) - 1)
+            consistency = max(0.0, 1.0 - 2.0 * math.sqrt(variance))
+
+        confidence = 0.30 + 0.50 * (0.6 * mean_score + 0.4 * top_score)
+        confidence += 0.12 * consistency
+        confidence += min(0.08, 0.04 * citation_count)
+        return min(1.0, max(0.0, confidence))

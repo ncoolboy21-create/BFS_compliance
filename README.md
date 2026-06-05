@@ -72,12 +72,17 @@ You can fine-tune the reranker with LoRA to improve ranking quality, which can i
 
 1. Train LoRA adapter and merged model:
    - `python -m scripts.train_lora_reranker --merge-adapter`
+   - Use a stronger Hugging Face cross-encoder if you can access the internet:
+     `python -m scripts.train_lora_reranker --base-model cross-encoder/ms-marco-MiniLM-L-12-v2 --merge-adapter`
    - Offline/local cache mode: `python -m scripts.train_lora_reranker --base-model <local_model_path> --local-files-only --merge-adapter`
 2. Point runtime reranker to the merged model in `.env`:
    - `RERANKER_MODEL_NAME=models/reranker_lora_merged`
    - `RERANKER_LOCAL_FILES_ONLY=true`
 3. Re-run evaluation:
    - `python -m scripts.run_eval`
+4. Run confidence benchmark to compare baseline vs tuned reranker:
+   - `python -m scripts.benchmark_confidence --baseline-model cross-encoder/ms-marco-MiniLM-L-12-v2 --tuned-model models/reranker_lora_merged`
+   - Results are written to `docs/confidence-benchmark.json` and `docs/confidence-benchmark.md`
 
 Notes:
 - Current training data is built from `data/golden_set.json` positives plus sampled negatives from `data/synthetic_corpus.jsonl`.

@@ -76,6 +76,7 @@ class ComplianceRAGPipeline:
             {
                 "doc_id": chunk.doc_id,
                 "section_id": chunk.section_id,
+                "chunk_id": chunk.chunk_id,
                 "text": chunk.text,
                 "score": score,
             }
@@ -83,9 +84,12 @@ class ComplianceRAGPipeline:
         ]
         answer, citations = self._generator.generate(req.question, contexts, req.max_citations)
 
-        confidence = self._reranker.confidence_from_scores([score for _, score in reranked])
+        confidence = self._reranker.confidence_from_scores(
+            [score for _, score in reranked],
+            citation_count=len(citations),
+        )
         reasons = escalation_reasons(req.question, confidence, bool(citations))
-        trust_decision = "AI_AUTO_APPROVED"
+        trust_decision = "AI_AUTO_APPROVED" if confidence >= settings.auto_approval_confidence_threshold else "HUMAN_APPROVAL_REQUIRED"
 
         return QAResponse(
             answer=answer,

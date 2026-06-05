@@ -3,9 +3,11 @@ from __future__ import annotations
 import argparse
 import json
 import random
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
+import numpy as np
 from datasets import Dataset
 from peft import LoraConfig, PeftModel, TaskType, get_peft_model
 from transformers import (
@@ -22,6 +24,10 @@ class TrainExample:
     question: str
     passage: str
     label: float
+
+
+def _tokenize(text: str) -> set[str]:
+    return set(re.findall(r"\b[a-z0-9]{3,}\b", text.lower()))
 
 
 def load_corpus_sections(corpus_path: Path) -> dict[str, str]:
@@ -59,19 +65,28 @@ def build_pairwise_dataset(
             continue
 
         positive_set = set(positive_keys)
-        negative_pool = [item for item in all_sections if item[0] not in positive_set]
+        candidate_negatives = [item for item in all_sections if item[0] not in positive_set]
+        query_tokens = _tokenize(question)
+
+        if query_tokens:
+            candidate_negatives.sort(
+                key=lambda item: len(query_tokens.intersection(_tokenize(item[1]))),
+                reverse=True,
+            )
+
+        soft_candidate_pool = candidate_negatives[: min(len(candidate_negatives), negatives_per_positive * 8)]
 
         for p_key in positive_keys:
             examples.append(
                 TrainExample(question=question, passage=section_map[p_key], label=1.0)
             )
 
-            if not negative_pool:
+            if not soft_candidate_pool:
                 continue
 
             sampled_negs = rnd.sample(
-                negative_pool,
-                k=min(negatives_per_positive, len(negative_pool)),
+                soft_candidate_pool,
+                k=min(negatives_per_positive, len(soft_candidate_pool)),
             )
             for _, neg_text in sampled_negs:
                 examples.append(
@@ -99,7 +114,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="LoRA fine-tune reranker for compliance RAG")
     parser.add_argument(
         "--base-model",
-        default="cross-encoder/ms-marco-MiniLM-L-6-v2",
+        default="cross-encoder/ms-marco-MiniLM-L-12-v2",
         help="Base cross-encoder model",
     )
     parser.add_argument("--golden-path", default="data/golden_set.json")
@@ -148,10 +163,12 @@ def main() -> None:
         tokenizer = AutoTokenizer.from_pretrained(
             args.base_model,
             local_files_only=args.local_files_only,
+            use_fast=True,
         )
         base_model = AutoModelForSequenceClassification.from_pretrained(
             args.base_model,
             num_labels=1,
+            problem_type="regression",
             local_files_only=args.local_files_only,
         )
     except Exception as exc:
@@ -181,6 +198,19 @@ def main() -> None:
         tok["labels"] = batch["label"]
         return tok
 
+    def compute_metrics(eval_pred):
+        predictions, labels = eval_pred
+        predictions = np.squeeze(predictions)
+        labels = np.array(labels, dtype=np.float32)
+        mse = float(np.mean((predictions - labels) ** 2))
+        pearson = 0.0
+        if predictions.size > 1 and np.std(predictions) > 0 and np.std(labels) > 0:
+            pearson = float(np.corrcoef(predictions, labels)[0, 1])
+        return {
+            "mse": mse,
+            "pearsonr": pearson,
+        }
+
     train_tok = train_ds.map(tokenize_fn, batched=True, remove_columns=train_ds.column_names)
     val_tok = val_ds.map(tokenize_fn, batched=True, remove_columns=val_ds.column_names)
 
@@ -189,18 +219,20 @@ def main() -> None:
 
     train_args = TrainingArguments(
         output_dir=str(output_dir),
-        overwrite_output_dir=True,
         learning_rate=args.learning_rate,
         per_device_train_batch_size=args.batch_size,
         per_device_eval_batch_size=args.batch_size,
         num_train_epochs=args.epochs,
         weight_decay=0.01,
-        evaluation_strategy="epoch",
+        eval_strategy="epoch",
         save_strategy="epoch",
-        logging_steps=10,
+        save_total_limit=1,
+        logging_steps=50,
         report_to="none",
         seed=args.seed,
-        load_best_model_at_end=False,
+        load_best_model_at_end=True,
+        metric_for_best_model="pearsonr",
+        greater_is_better=True,
         fp16=False,
     )
 
@@ -211,6 +243,7 @@ def main() -> None:
         eval_dataset=val_tok,
         tokenizer=tokenizer,
         data_collator=DataCollatorWithPadding(tokenizer=tokenizer),
+        compute_metrics=compute_metrics,
     )
 
     trainer.train()
