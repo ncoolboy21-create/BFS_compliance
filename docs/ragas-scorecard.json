@@ -1,7 +1,7 @@
 {
   "aggregate": {
-    "faithfulness": 0.602,
-    "context_recall": 0.75,
+    "faithfulness": 0.659,
+    "context_recall": 0.65,
     "pass_faithfulness": false,
     "pass_context_recall": false,
     "scoring_mode": "proxy"
@@ -9,122 +9,122 @@
   "rows": [
     {
       "question": "What is required before customer onboarding account activation?",
-      "faithfulness": 0.8,
+      "faithfulness": 0.956,
       "context_recall": 1.0,
-      "confidence": 0.563,
+      "confidence": 0.748,
       "citations": [
         "POL-001#S1",
-        "SYN-030#S1",
-        "SYN-048#S1",
-        "SYN-100#S1"
+        "SYN-175#S1",
+        "SYN-223#S1",
+        "SYN-283#S1"
       ]
     },
     {
       "question": "How quickly must transaction alerts be reviewed?",
-      "faithfulness": 0.867,
-      "context_recall": 1.0,
-      "confidence": 0.551,
+      "faithfulness": 0.044,
+      "context_recall": 0.0,
+      "confidence": 0.827,
       "citations": [
-        "POL-002#S1",
-        "POL-003#S1",
-        "POL-004#S2",
-        "POL-005#S2"
+        "SYN-194#S1",
+        "SYN-218#S1",
+        "SYN-290#S1",
+        "SYN-314#S1"
       ]
     },
     {
       "question": "How long are compliance records retained?",
-      "faithfulness": 0.829,
+      "faithfulness": 0.971,
       "context_recall": 1.0,
-      "confidence": 0.552,
+      "confidence": 0.747,
       "citations": [
         "POL-003#S1",
-        "POL-003#S2",
-        "POL-004#S1",
-        "POL-005#S1"
+        "SYN-135#S1",
+        "SYN-183#S1",
+        "SYN-219#S1"
       ]
     },
     {
       "question": "Can AI compliance recommendations be auto-approved without human review?",
-      "faithfulness": 0.85,
-      "context_recall": 1.0,
-      "confidence": 0.539,
+      "faithfulness": 0.575,
+      "context_recall": 0.5,
+      "confidence": 0.748,
       "citations": [
-        "POL-003#S1",
         "POL-004#S1",
-        "REG-005#S2",
-        "REG-006#S1"
+        "SYN-178#S1",
+        "SYN-268#S1",
+        "SYN-310#S1"
       ]
     },
     {
       "question": "What did the AML audit find about SLA breaches?",
-      "faithfulness": 0.0,
-      "context_recall": 0.0,
-      "confidence": 0.52,
+      "faithfulness": 1.0,
+      "context_recall": 1.0,
+      "confidence": 0.666,
       "citations": [
-        "POL-003#S2",
-        "SYN-030#S2",
-        "SYN-048#S2",
-        "SYN-100#S2"
+        "AUD-001#S1",
+        "AUD-001#S2",
+        "SYN-152#S2",
+        "SYN-302#S2"
       ]
     },
     {
       "question": "What is the policy control for high-risk jurisdictions?",
-      "faithfulness": 0.867,
+      "faithfulness": 0.978,
       "context_recall": 1.0,
-      "confidence": 0.547,
+      "confidence": 0.56,
       "citations": [
         "POL-001#S2",
-        "SYN-030#S2",
-        "SYN-048#S2",
-        "SYN-100#S2"
+        "POL-003#S1",
+        "POL-009#S1",
+        "POL-009#S2"
       ]
     },
     {
       "question": "What is expected for cross-border EU data transfer?",
-      "faithfulness": 0.631,
-      "context_recall": 1.0,
-      "confidence": 0.551,
+      "faithfulness": 0.523,
+      "context_recall": 0.5,
+      "confidence": 0.756,
       "citations": [
-        "POL-007#S1",
-        "POL-007#S2",
         "REG-003#S1",
-        "REG-004#S2"
+        "SYN-149#S1",
+        "SYN-167#S1",
+        "SYN-185#S1"
       ]
     },
     {
       "question": "What does regulation say about suspicious activity escalation capability?",
-      "faithfulness": 0.925,
+      "faithfulness": 1.0,
       "context_recall": 1.0,
-      "confidence": 0.528,
+      "confidence": 0.748,
       "citations": [
-        "AUD-003#S1",
         "REG-001#S2",
-        "SYN-120#S1",
-        "SYN-120#S2"
+        "SYN-170#S1",
+        "SYN-194#S1",
+        "SYN-284#S1"
       ]
     },
     {
       "question": "What is expected if privileged account recertification evidence is missing?",
-      "faithfulness": 0.255,
+      "faithfulness": 0.473,
       "context_recall": 0.5,
-      "confidence": 0.539,
+      "confidence": 0.762,
       "citations": [
         "AUD-005#S1",
-        "AUD-006#S2",
-        "REG-004#S2",
-        "REG-006#S2"
+        "SYN-198#S2",
+        "SYN-210#S2",
+        "SYN-234#S2"
       ]
     },
     {
       "question": "What board reporting expectation appears in UK consumer duty update?",
-      "faithfulness": 0.0,
+      "faithfulness": 0.067,
       "context_recall": 0.0,
-      "confidence": 0.524,
+      "confidence": 0.791,
       "citations": [
-        "AUD-003#S2",
-        "AUD-004#S1",
-        "AUD-006#S2",
-        "POL-008#S2"
+        "SYN-167#S2",
+        "SYN-185#S2",
+        "SYN-191#S2",
+        "SYN-233#S2"
       ]
     }
   ]

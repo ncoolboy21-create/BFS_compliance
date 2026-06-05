@@ -126,6 +126,11 @@
     .conf-badge.high   { background: rgba(63,185,80,.15);  color: var(--green);  border: 1px solid rgba(63,185,80,.3); }
     .conf-badge.medium { background: rgba(210,153,34,.15); color: var(--yellow); border: 1px solid rgba(210,153,34,.3); }
     .conf-badge.low    { background: rgba(248,81,73,.15);  color: var(--red);    border: 1px solid rgba(248,81,73,.3); }
+    .metric-badge {
+      display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 3px 8px;
+      border-radius: 20px; font-weight: 600; background: rgba(121,184,255,.12);
+      color: #79b8ff; border: 1px solid rgba(121,184,255,.3);
+    }
     .trust-badge {
       font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 500;
       background: rgba(31,111,235,.12); color: #79b8ff; border: 1px solid rgba(31,111,235,.25);
@@ -560,6 +565,10 @@ function appendAnswerBubble(data) {
   const confClass = conf >= 0.75 ? 'high' : conf >= 0.55 ? 'medium' : 'low';
   const confLabel = conf >= 0.75 ? 'High confidence' : conf >= 0.55 ? 'Medium confidence' : 'Low confidence';
   const confPct = (conf * 100).toFixed(0);
+  const faithfulnessNum = Number(data.faithfulness);
+  const contextRecallNum = Number(data.context_recall);
+  const faithfulness = Number.isFinite(faithfulnessNum) ? faithfulnessNum : null;
+  const contextRecall = Number.isFinite(contextRecallNum) ? contextRecallNum : null;
 
   const escBadges = (data.escalation_reasons || []).map(r =>
     `<span class="esc-badge">⚠ ${esc(r)}</span>`).join('');
@@ -574,6 +583,8 @@ function appendAnswerBubble(data) {
     <div class="answer-text">${esc(data.answer)}</div>
     <div class="meta-row">
       <span class="conf-badge ${confClass}">${confLabel} (${confPct}%)</span>
+      <span class="metric-badge">Faithfulness: ${faithfulness === null ? 'N/A' : (faithfulness * 100).toFixed(0) + '%'}</span>
+      <span class="metric-badge">Context Recall: ${contextRecall === null ? 'N/A' : (contextRecall * 100).toFixed(0) + '%'}</span>
       ${escBadges}
     </div>
     ${citCount > 0 ? `

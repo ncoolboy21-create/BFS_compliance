@@ -10,9 +10,12 @@ from app.core.config import settings
 from app.domain.models import Citation
 
 try:
-    from google import genai
+    import google.generativeai as genai
 except ImportError:  # pragma: no cover
-    genai = None
+    try:
+        from google import genai  # type: ignore
+    except ImportError:  # pragma: no cover
+        genai = None
 
 try:
     from openai import AzureOpenAI, OpenAI
@@ -137,14 +140,7 @@ class CitationAwareGenerator:
         self._model = None
         self._client = None
 
-        if self._use_openai and OpenAI is not None:
-            try:
-                self._client = OpenAI(api_key=settings.openai_api_key)
-                self._model = "openai"
-            except Exception as exc:
-                logger.warning("OpenAI initialization failed; trying next provider. Error: %s", exc)
-                self._model = None
-        elif self._use_azure and AzureOpenAI is not None:
+        if self._use_azure and AzureOpenAI is not None:
             try:
                 self._client = AzureOpenAI(
                     api_key=settings.azure_openai_api_key,
@@ -153,7 +149,14 @@ class CitationAwareGenerator:
                 )
                 self._model = "azure_openai"
             except Exception as exc:
-                logger.warning("Azure OpenAI initialization failed; using fallback generation. Error: %s", exc)
+                logger.warning("Azure OpenAI initialization failed; trying next provider. Error: %s", exc)
+                self._model = None
+        elif self._use_openai and OpenAI is not None:
+            try:
+                self._client = OpenAI(api_key=settings.openai_api_key)
+                self._model = "openai"
+            except Exception as exc:
+                logger.warning("OpenAI initialization failed; trying next provider. Error: %s", exc)
                 self._model = None
         elif self._use_gemini and genai is not None:
             try:
@@ -212,10 +215,19 @@ class CitationAwareGenerator:
                     )
                     parsed = self._safe_parse_json(response.choices[0].message.content or "")
                 else:
-                    response = self._model.generate_content(
-                        prompt,
-                        temperature=settings.gemini_temperature,
-                    )
+                    try:
+                        response = self._model.generate_content(
+                            prompt,
+                            generation_config={"temperature": settings.gemini_temperature},
+                        )
+                    except TypeError:
+                        try:
+                            response = self._model.generate_content(
+                                prompt,
+                                config={"temperature": settings.gemini_temperature},
+                            )
+                        except TypeError:
+                            response = self._model.generate_content(prompt)
                     parsed = self._safe_parse_json(response.text)
                 
                 citations = [Citation(**item) for item in parsed.get("citations", [])[:max_citations]]
@@ -261,7 +273,6 @@ class CitationAwareGenerator:
             merged_text = self._merge_with_overlap(ordered_parts)
             merged_entries.append((doc_id, section_id, merged_text))
 
-        merged_entries.sort(key=lambda item: (item[0], self._section_sort_key(item[1])))
         merged_entries = self._dedupe_entries(merged_entries)
 
         primary_text = merged_entries[0][2] if merged_entries else self._clean_leading_fragment(picked[0]["text"])

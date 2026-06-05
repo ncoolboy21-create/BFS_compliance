@@ -47,6 +47,8 @@ class QAResponse(BaseModel):
     answer: str
     citations: list[Citation]
     confidence: float
+    faithfulness: float
+    context_recall: float
     trust_decision: str
     escalation_reasons: list[str]
     retrieval_debug: dict[str, object]

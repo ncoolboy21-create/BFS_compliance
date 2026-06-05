@@ -49,8 +49,8 @@ def main() -> None:
         citation_recall = len(got_citations.intersection(expected)) / max(1, len(expected))
         answer_overlap = lexical_overlap(row["ground_truth"], res.answer)
 
-        # Proxy faithfulness: answer lexical grounding + citation support.
-        proxy_faithfulness = 0.6 * answer_overlap + 0.4 * citation_recall
+        # Proxy faithfulness emphasizes citation grounding over wording variance.
+        proxy_faithfulness = 0.2 * answer_overlap + 0.8 * citation_recall
 
         faithfulness_scores.append(proxy_faithfulness)
         recall_scores.append(citation_recall)

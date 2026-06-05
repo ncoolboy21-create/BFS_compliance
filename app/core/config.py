@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     chroma_collection_name: str = "compliance_chunks"
     embedding_model_name: str = "sentence-transformers/all-MiniLM-L6-v2"
     embedding_local_files_only: bool = False
+    enable_embedding_retriever: bool = True
 
     use_gemini: bool = Field(default=False, description="Set true to call Gemini.")
     gemini_api_key: str | None = None

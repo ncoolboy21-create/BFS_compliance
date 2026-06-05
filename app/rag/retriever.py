@@ -11,14 +11,31 @@ try:
 except ImportError:  # pragma: no cover
     chromadb = None  # type: ignore
 
-try:
-    from sentence_transformers import SentenceTransformer
-except ImportError:  # pragma: no cover
-    SentenceTransformer = None  # type: ignore
-
 
 def _tokenize(text: str) -> list[str]:
     return re.findall(r"\b[a-z0-9]{3,}\b", text.lower())
+
+
+def _lexical_overlap_score(query_tokens: set[str], chunk_tokens: set[str]) -> float:
+    if not query_tokens:
+        return 0.0
+    return float(len(query_tokens.intersection(chunk_tokens))) / float(len(query_tokens))
+
+
+def _query_doc_type_hint(query: str) -> str | None:
+    lower_query = query.lower()
+    if "audit" in lower_query:
+        return "audit"
+    if "regulation" in lower_query or "regulatory" in lower_query:
+        return "regulation"
+    if "policy" in lower_query:
+        return "policy"
+    return None
+
+
+def _source_boost(doc_id: str) -> float:
+    # Prefer curated policy/audit/regulation sources over synthetic controls.
+    return -0.08 if doc_id.startswith("SYN-") else 0.12
 
 
 class VectorRetriever:
@@ -29,12 +46,23 @@ class VectorRetriever:
         self._chroma_client = None
         self._collection = None
 
-        if chromadb is not None and SentenceTransformer is not None:
+        if not settings.enable_embedding_retriever:
+            return
+
+        sentence_transformer_cls = None
+        try:
+            from sentence_transformers import SentenceTransformer
+
+            sentence_transformer_cls = SentenceTransformer
+        except ImportError:  # pragma: no cover
+            sentence_transformer_cls = None
+
+        if chromadb is not None and sentence_transformer_cls is not None:
             try:
                 persist_dir = Path(settings.chroma_persist_dir)
                 persist_dir.mkdir(parents=True, exist_ok=True)
 
-                self._embedder = SentenceTransformer(
+                self._embedder = sentence_transformer_cls(
                     settings.embedding_model_name,
                     local_files_only=settings.embedding_local_files_only,
                 )
@@ -84,6 +112,9 @@ class VectorRetriever:
         self._upsert_chunks(new_chunks)
 
     def retrieve(self, query: str, top_k: int = 12, jurisdiction: str | None = None) -> list[tuple[Chunk, float]]:
+        query_tokens = set(_tokenize(query))
+        type_hint = _query_doc_type_hint(query)
+
         if self._collection is not None and self._embedder is not None:
             query_embedding = self._embedder.encode([query], normalize_embeddings=True).tolist()[0]
 
@@ -95,7 +126,8 @@ class VectorRetriever:
                 include=["documents", "metadatas", "distances"],
             )
 
-            scored: list[tuple[Chunk, float]] = []
+            vector_scores: dict[tuple[str, str], float] = {}
+            vector_chunks: dict[tuple[str, str], Chunk] = {}
             documents = result.get("documents", [[]])[0]
             metadatas = result.get("metadatas", [[]])[0]
             distances = result.get("distances", [[]])[0]
@@ -117,21 +149,35 @@ class VectorRetriever:
                     text=doc_text,
                 )
                 score = 1.0 / (1.0 + float(distance))
-                scored.append((chunk, score))
+                key = (chunk.chunk_id, chunk.section_id)
+                vector_scores[key] = score
+                vector_chunks[key] = chunk
 
-            scored.sort(key=lambda item: item[1], reverse=True)
-            return scored[:top_k]
+            hybrid_scores: list[tuple[Chunk, float]] = []
+            for chunk, chunk_tokens in zip(self._chunks, self._chunk_tokens):
+                if jurisdiction and chunk.jurisdiction not in {jurisdiction, "global"}:
+                    continue
+
+                key = (chunk.chunk_id, chunk.section_id)
+                vector_score = vector_scores.get(key, 0.0)
+                lexical_score = _lexical_overlap_score(query_tokens, chunk_tokens)
+                type_boost = 0.06 if type_hint is not None and chunk.doc_type == type_hint else 0.0
+                hybrid_score = 0.65 * vector_score + 0.35 * lexical_score + type_boost + _source_boost(chunk.doc_id)
+                hybrid_scores.append((vector_chunks.get(key, chunk), hybrid_score))
+
+            hybrid_scores.sort(key=lambda item: item[1], reverse=True)
+            return hybrid_scores[:top_k]
 
         if not self._chunks:
             raise RuntimeError("Retriever index has not been built.")
 
-        query_tokens = set(_tokenize(query))
         scored: list[tuple[Chunk, float]] = []
         for chunk, chunk_tokens in zip(self._chunks, self._chunk_tokens):
             if jurisdiction and chunk.jurisdiction != jurisdiction and chunk.jurisdiction != "global":
                 continue
-            overlap = len(query_tokens.intersection(chunk_tokens))
-            score = float(overlap) / max(1, len(query_tokens))
+            overlap_score = _lexical_overlap_score(query_tokens, chunk_tokens)
+            type_boost = 0.06 if type_hint is not None and chunk.doc_type == type_hint else 0.0
+            score = overlap_score + type_boost + _source_boost(chunk.doc_id)
             scored.append((chunk, score))
 
         scored.sort(key=lambda item: item[1], reverse=True)
